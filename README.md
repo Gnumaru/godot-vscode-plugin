@@ -173,6 +173,49 @@ Everything:
 
 Godot's command flags are documented here: https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html
 
+### Godot 4: Debug Adapter Protocol (DAP) via the editor
+
+Godot 4 projects no longer talk directly to the game. The extension connects
+as a DAP client to the Godot editor's Debug Adapter server
+(`Editor Settings > Network > Debug Adapter > Remote Port`, default `6006`),
+and the editor spawns / attaches the game itself. Because breakpoints are
+registered in the editor *before* it spawns the game, early breakpoints in
+`_ready` / `_enter_tree` / `_init` work even when the scene is started from
+the editor.
+
+Workflow to catch `_ready` (listen-first):
+
+1. Open the project in the Godot 4 editor (same folder as `${workspaceFolder}`).
+2. Start one of these in VSCode **first**:
+```json
+{
+	"name": "GDLISTEN",
+	"type": "godot",
+	"request": "attach",
+	"project": "${workspaceFolder}",
+	"address": "127.0.0.1",
+	"debugServer": 6006
+}
+```
+or DAP launch (VSCode asks the editor to play):
+```json
+{
+	"name": "GDLAUNCH",
+	"type": "godot",
+	"request": "launch",
+	"project": "${workspaceFolder}",
+	"scene": "current",
+	"debugServer": 6006
+}
+```
+3. For `attach`: press Play in the Godot editor *after* starting VSCode.
+   Breakpoints synced beforehand are passed by the editor via `--breakpoints`,
+   so `_ready` stops in VSCode.
+
+Godot 3 keeps the legacy direct-to-game protocol (`port` 6007, extension
+listens and spawns the game). Scene-tree Inspector views are only available
+in that legacy mode; in Godot 4 DAP mode they show a "not available" notice.
+
 _Usage_
 
 - Stacktrace and variable dumps are the same as any regular debugger

@@ -476,13 +476,23 @@
 							},
 							"address": {
 								"type": "string",
-								"description": "The IP address for the Godot remote debugger to use.",
+								"description": "The IP address for the Godot remote debugger to use. Godot 4 DAP mode uses this as fallback for the editor Debug Adapter host (see debugServerAddress).",
 								"default": "127.0.0.1"
 							},
 							"port": {
 								"type": "number",
-								"description": "The port number for the Godot remote debugger to use.",
+								"description": "The port number for the Godot remote debugger to use. Godot 3 legacy protocol only; ignored in Godot 4 DAP mode.",
 								"default": 6007
+							},
+							"debugServer": {
+								"type": "number",
+								"description": "Godot 4 only: port of the Godot editor Debug Adapter (DAP) server. Must match Editor Settings > Network > Debug Adapter > Remote Port (default 6006). The extension connects here; the editor spawns the game, so early breakpoints in _ready/_enter_tree work.",
+								"default": 6006
+							},
+							"debugServerAddress": {
+								"type": "string",
+								"description": "Godot 4 only: host of the Godot editor Debug Adapter server. Defaults to `address`.",
+								"default": "127.0.0.1"
 							},
 							"scene": {
 								"type": "string",
@@ -568,13 +578,28 @@
 						"properties": {
 							"address": {
 								"type": "string",
-								"description": "The IP address for the Godot remote debugger to use.",
+								"description": "Godot 3: IP of the legacy remote debugger. Godot 4 DAP mode: fallback host for the editor Debug Adapter (see debugServerAddress).",
 								"default": "127.0.0.1"
 							},
 							"port": {
 								"type": "number",
-								"description": "The port number for the Godot remote debugger to use.",
+								"description": "Godot 3 only: legacy remote-debug port the extension listens on. Ignored in Godot 4 DAP mode.",
 								"default": 6007
+							},
+							"debugServer": {
+								"type": "number",
+								"description": "Godot 4 only: port of the Godot editor Debug Adapter (DAP) server. Must match Editor Settings > Network > Debug Adapter > Remote Port (default 6006). Start the debug session in VSCode first, then press Play in the editor; breakpoints sent before Play are honored, including _ready/_enter_tree.",
+								"default": 6006
+							},
+							"debugServerAddress": {
+								"type": "string",
+								"description": "Godot 4 only: host of the Godot editor Debug Adapter server. Defaults to `address`.",
+								"default": "127.0.0.1"
+							},
+							"project": {
+								"type": "string",
+								"description": "Absolute path to a directory with a project.godot file. Must be the project open in the Godot editor.",
+								"default": "${workspaceFolder}"
 							}
 						}
 					}

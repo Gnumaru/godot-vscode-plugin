@@ -33,6 +33,10 @@ const log = createLogger("debugger", { output: "Godot Debugger" });
 export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
 	address: string;
 	port: number;
+	/** Editor Debug Adapter (DAP) port. Godot 4 only, default 6006. */
+	debugServer?: number;
+	/** Editor DAP host. Defaults to `address`. */
+	debugServerAddress?: string;
 	project: string;
 	scene: string;
 	editor_path: string;
@@ -53,6 +57,10 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 export interface AttachRequestArguments extends DebugProtocol.AttachRequestArguments {
 	address: string;
 	port: number;
+	/** Editor Debug Adapter (DAP) port. Godot 4 only, default 6006. */
+	debugServer?: number;
+	/** Editor DAP host. Defaults to `address`. */
+	debugServerAddress?: string;
 	project: string;
 	scene: string;
 	additional_options: string;
@@ -150,10 +158,34 @@ export class GodotDebugger implements DebugAdapterDescriptorFactory, DebugConfig
 			if (!config.project) {
 				config.project = "${workspaceFolder}";
 			}
+			if (config.debugServer === undefined) {
+				config.debugServer = 6006;
+			}
+		}
+
+		if (config.request === "attach") {
+			if (!config.address) {
+				config.address = "127.0.0.1";
+			}
+			if (config.port === undefined) {
+				// Legacy remote-debug port, unused in Godot 4 DAP mode but kept for compat.
+				config.port = 6007;
+			}
+			if (!config.project) {
+				config.project = "${workspaceFolder}";
+			}
+			if (config.debugServer === undefined) {
+				config.debugServer = 6006;
+			}
 		}
 
 		if (typeof config.port !== "number" || config.port < -1 || config.port > 65535) {
 			window.showErrorMessage("Can't launch debug session: 'port' must be a number between -1 and 65535.", "Ok");
+			return undefined;
+		}
+
+		if (config.debugServer !== undefined && (typeof config.debugServer !== "number" || config.debugServer < 0 || config.debugServer > 65535)) {
+			window.showErrorMessage("Can't launch debug session: 'debugServer' must be a number between 0 and 65535.", "Ok");
 			return undefined;
 		}
 
